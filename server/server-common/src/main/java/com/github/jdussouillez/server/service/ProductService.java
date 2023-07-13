@@ -21,7 +21,9 @@ public class ProductService {
 
     public Multi<Product> get(final int maxCount) {
         return Multi.createFrom().range(1, maxCount + 1)
-            .map(this::generate);
+            .map(this::generate)
+            .onCompletion()
+            .invoke(() -> Loggers.MAIN.info("Done"));
     }
 
     private Product generate(final int num) {
