@@ -25,8 +25,10 @@ public class ProductService {
     }
 
     private Product generate(final int num) {
-        var id = String.format("%010d", num);
-        System.out.println("generating " + id);
+        var id = String.format("%08d", num);
+        if (num % 10_000 == 0) {
+            Loggers.MAIN.info("Generating product " + id);
+        }
         return new Product(id, "Product #" + id, random.nextInt(10_000), generateAttributes());
     }
 
