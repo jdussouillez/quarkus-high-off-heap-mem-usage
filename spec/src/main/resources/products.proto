@@ -10,7 +10,7 @@ service ProductGrpcApiService {
 
 message ProductGetRequest {
 
-    uint32 count = 1;
+    uint32 delay = 1;
 }
 
 message Product {
@@ -20,19 +20,4 @@ message Product {
     string designation = 2;
 
     uint32 stock = 3;
-
-    repeated ProductAttribute attributes = 4;
-}
-
-message ProductAttribute {
-
-    string id = 1;
-
-    string designation = 2;
-
-    oneof value {
-        string strValue = 3;
-        double doubleValue = 4;
-        bool boolValue = 5;
-    }
 }

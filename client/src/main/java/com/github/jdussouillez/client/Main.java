@@ -10,7 +10,6 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
 
 @QuarkusMain
 public class Main implements QuarkusApplication {
@@ -21,28 +20,26 @@ public class Main implements QuarkusApplication {
     @Override
     public int run(final String... args) throws InterruptedException {
         if (args.length != 2) {
-            System.out.println("Usage: <count> <src>");
+            System.out.println("Usage: <delay> <src>");
             return 1;
         }
-        int count;
+        int delay;
         try {
-            count = Integer.parseInt(args[0]);
+            delay = Integer.parseInt(args[0]);
         } catch (NumberFormatException ex) {
             System.err.println("Invalid number");
             return 1;
         }
         boolean fromGrpc = args[1].equals("grpc");
-
-        var lock = new CountDownLatch(1);
-        (fromGrpc ? getProductsFromServer(count) : getProducts(count))
-            .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
+        return (fromGrpc ? getProductsFromServer(delay) : getProducts(delay))
+            .emitOn(Infrastructure.getDefaultWorkerPool())
             .onSubscription()
             .invoke(() -> Loggers.MAIN.info("Fetching products..."))
             .onFailure()
             .invoke(ex -> Loggers.MAIN.error("Error when fetching products", ex))
             .group()
             .intoLists()
-            .of(1_000)
+            .of(10)
             .call(products -> {
                 Loggers.MAIN.info("Saving {} products in db", products::size);
                 return Uni.createFrom().voidItem()
@@ -51,30 +48,26 @@ public class Main implements QuarkusApplication {
                     .by(Duration.ofMillis(100));
             })
             .onCompletion()
-            .invoke(() -> {
-                Loggers.MAIN.info("All fetched");
-                lock.countDown();
-            })
-            .subscribe()
-            .with(
-                sub -> {},
-                ex -> {}
-            );
-        lock.await();
-        return 0;
+            .invoke(() -> Loggers.MAIN.info("All fetched"))
+            .collect()
+            .last()
+            .replaceWith(0)
+            .onFailure()
+            .recoverWithItem(1)
+            .await()
+            .indefinitely();
     }
 
-    private Multi<Product> getProductsFromServer(final int count) {
-        return productGrpcApiService.get(ProductGetRequest.newBuilder().setCount(count).build());
+    private Multi<Product> getProductsFromServer(final int delay) {
+        return productGrpcApiService.get(ProductGetRequest.newBuilder().setDelay(delay).build());
     }
 
-    private Multi<Product> getProducts(final int count) {
-        return Multi.createFrom().range(0, count)
+    private Multi<Product> getProducts(final int delay) {
+        return Multi.createFrom().ticks()
+            .every(Duration.ofMillis(delay))
             .map(i -> {
                 var id = String.format("%08d", i);
-                if (i % 10_000 == 0) {
-                    Loggers.MAIN.info("Generating product " + id);
-                }
+                Loggers.MAIN.info("Generating product " + id);
                 return Product.newBuilder()
                     .setId(String.valueOf(i))
                     .setDesignation("Product #" + String.valueOf(id))
