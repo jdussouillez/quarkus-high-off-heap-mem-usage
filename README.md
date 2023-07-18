@@ -25,5 +25,10 @@ java -jar server-rpc/target/quarkus-app/quarkus-run.jar
 
 ```
 # Client
-java -jar target/quarkus-app/quarkus-run.jar
+
+# For local data fetching
+java -XX:NativeMemoryTracking=summary -jar target/quarkus-app/quarkus-run.jar 100 local
+
+# For gRPC data fetching
+java -XX:NativeMemoryTracking=summary -jar target/quarkus-app/quarkus-run.jar 100 grpc
 ```
