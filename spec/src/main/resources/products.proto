@@ -10,7 +10,7 @@ service ProductGrpcApiService {
 
 message ProductGetRequest {
 
-    uint32 delay = 1;
+    uint32 itemNumber = 1;
 }
 
 message Product {

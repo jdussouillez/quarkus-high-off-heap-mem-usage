@@ -12,9 +12,10 @@ public class ProductService {
 
     private final Random random = new Random();
 
-    public Multi<Product> get(final int delay) {
+    public Multi<Product> get(final int itemNumber) {
         return Multi.createFrom().ticks()
-            .every(Duration.ofMillis(delay))
+            .every(Duration.ofMillis(100))
+            .select().first(itemNumber)
             .map(this::generate)
             .invoke(p -> Loggers.MAIN.info("Generating product {}", p))
             .onCompletion()

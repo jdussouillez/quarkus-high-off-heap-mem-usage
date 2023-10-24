@@ -22,7 +22,7 @@ public class ProductApiService implements ProductGrpcApiService {
 
     @Override
     public Multi<Product> get(final ProductGetRequest request) {
-        return productService.get(request.getDelay())
+        return productService.get(request.getItemNumber())
             .map(productMapper::toGrpc);
     }
 }

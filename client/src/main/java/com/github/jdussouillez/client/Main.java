@@ -20,18 +20,18 @@ public class Main implements QuarkusApplication {
     @Override
     public int run(final String... args) throws InterruptedException {
         if (args.length != 2) {
-            System.out.println("Usage: <delay> <src>");
+            System.out.println("Usage: <item number> <src>");
             return 1;
         }
-        int delay;
+        int itemNumber;
         try {
-            delay = Integer.parseInt(args[0]);
+            itemNumber = Integer.parseInt(args[0]);
         } catch (NumberFormatException ex) {
             System.err.println("Invalid number");
             return 1;
         }
         boolean fromGrpc = args[1].equals("grpc");
-        return (fromGrpc ? getProductsFromServer(delay) : getProducts(delay))
+        return (fromGrpc ? getProductsFromServer(itemNumber) : getProducts(itemNumber))
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .onSubscription()
             .invoke(() -> Loggers.MAIN.info("Fetching products..."))
@@ -58,13 +58,14 @@ public class Main implements QuarkusApplication {
             .indefinitely();
     }
 
-    private Multi<Product> getProductsFromServer(final int delay) {
-        return productGrpcApiService.get(ProductGetRequest.newBuilder().setDelay(delay).build());
+    private Multi<Product> getProductsFromServer(final int itemNumber) {
+        return productGrpcApiService.get(ProductGetRequest.newBuilder().setItemNumber(itemNumber).build());
     }
 
-    private Multi<Product> getProducts(final int delay) {
+    private Multi<Product> getProducts(final int itemNumber) {
         return Multi.createFrom().ticks()
-            .every(Duration.ofMillis(delay))
+            .every(Duration.ofMillis(100))
+            .select().first(itemNumber)
             .map(i -> {
                 var id = String.format("%08d", i);
                 Loggers.MAIN.info("Generating product " + id);
