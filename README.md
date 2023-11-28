@@ -26,9 +26,9 @@ docker run -d \
     --rm \
     --network host \
     --name server \
-    -m 128m \
+    -m 256m \
     --cpus=2 \
-    -e JAVA_OPTS="-Xms64m -Xmx64m" \
+    -e JAVA_OPTS="-Xms128m -Xmx128m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/server:1.0.0-SNAPSHOT \
     && docker logs server -f
@@ -40,7 +40,7 @@ docker run -d \
     --rm \
     --network host \
     --name client \
-    -m 128m \
+    -m 512m \
     --cpus=2 \
     -e JAVA_OPTS="-Xms64m -Xmx64m" \
     -v /tmp:/tmp \
@@ -52,8 +52,8 @@ docker run -d \
 ## Cleanup
 
 ```sh
-docker stop server \
-    && docker stop client \
+docker rm --force server \
+    && docker rm --force client \
     && docker rmi quarkus-high-off-heap-mem-usage/server:1.0.0-SNAPSHOT -f \
     && docker rmi quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT -f
 ```
