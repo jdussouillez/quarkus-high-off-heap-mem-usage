@@ -10,16 +10,18 @@ import java.util.Random;
 @ApplicationScoped
 public class ProductService {
 
-    private final Random random = new Random();
+    private final Random random = new Random(42L);
 
     public Multi<Product> get(final int itemNumber) {
         return Multi.createFrom().ticks()
-            .every(Duration.ofMillis(100))
-            .select().first(itemNumber)
+            .every(Duration.ofMillis(5L))
+            .select()
+            .first(itemNumber)
             .map(this::generate)
-            .invoke(p -> Loggers.MAIN.info("Generating product {}", p))
+            .onSubscription()
+            .invoke(() -> Loggers.MAIN.info("Sending products to the client..."))
             .onCompletion()
-            .invoke(() -> Loggers.MAIN.info("Done"));
+            .invoke(() -> Loggers.MAIN.info("All products sent!"));
     }
 
     private Product generate(final long num) {

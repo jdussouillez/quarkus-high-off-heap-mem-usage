@@ -8,8 +8,9 @@ import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import java.time.Duration;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @QuarkusMain
 public class Main implements QuarkusApplication {
@@ -17,10 +18,12 @@ public class Main implements QuarkusApplication {
     @GrpcClient("serv")
     protected ProductGrpcApiService productGrpcApiService;
 
+    private final Random random = new Random(123L);
+
     @Override
     public int run(final String... args) throws InterruptedException {
-        if (args.length != 2) {
-            System.out.println("Usage: <item number> <src>");
+        if (args.length != 1) {
+            System.out.println("Usage: <number of items to fetch>");
             return 1;
         }
         int itemNumber;
@@ -30,25 +33,31 @@ public class Main implements QuarkusApplication {
             System.err.println("Invalid number");
             return 1;
         }
-        boolean fromGrpc = args[1].equals("grpc");
-        return (fromGrpc ? getProductsFromServer(itemNumber) : getProducts(itemNumber))
-            .emitOn(Infrastructure.getDefaultWorkerPool())
+        var counter = new AtomicInteger();
+        return getProducts(itemNumber)
+            //.emitOn(Infrastructure.getDefaultWorkerPool())
             .onSubscription()
             .invoke(() -> Loggers.MAIN.info("Fetching products..."))
+            .onCompletion()
+            .invoke(() -> Loggers.MAIN.info("All products fetched!"))
             .onFailure()
             .invoke(ex -> Loggers.MAIN.error("Error when fetching products", ex))
             .group()
             .intoLists()
-            .of(10)
+            .of(500)
             .call(products -> {
-                Loggers.MAIN.info("Saving {} products in db", products::size);
+                Loggers.MAIN.debug("Saving {} products in db", products::size);
                 return Uni.createFrom().voidItem()
                     .onItem()
                     .delayIt()
-                    .by(Duration.ofMillis(100));
+                    .by(Duration.ofMillis(1 + random.nextInt(200)));
             })
-            .onCompletion()
-            .invoke(() -> Loggers.MAIN.info("All fetched"))
+            .invoke(products -> {
+                int nbProcessed = counter.addAndGet(products.size());
+                if (nbProcessed % 10_000 == 0) {
+                    Loggers.MAIN.info("Products processed: {} / {}", nbProcessed, itemNumber);
+                }
+            })
             .collect()
             .last()
             .replaceWith(0)
@@ -58,21 +67,11 @@ public class Main implements QuarkusApplication {
             .indefinitely();
     }
 
-    private Multi<Product> getProductsFromServer(final int itemNumber) {
-        return productGrpcApiService.get(ProductGetRequest.newBuilder().setItemNumber(itemNumber).build());
-    }
-
     private Multi<Product> getProducts(final int itemNumber) {
-        return Multi.createFrom().ticks()
-            .every(Duration.ofMillis(100))
-            .select().first(itemNumber)
-            .map(i -> {
-                var id = String.format("%08d", i);
-                Loggers.MAIN.info("Generating product " + id);
-                return Product.newBuilder()
-                    .setId(String.valueOf(i))
-                    .setDesignation("Product #" + String.valueOf(id))
-                    .build();
-            });
+        return productGrpcApiService.get(
+            ProductGetRequest.newBuilder()
+                .setItemNumber(itemNumber)
+                .build()
+        );
     }
 }
