@@ -1,6 +1,8 @@
 # quarkus-high-off-heap-mem-usage
 
-Project to reproduce a suspicious behavior where the off heap memory seems to go wild
+Project to reproduce a suspicious behavior where the off heap memory seems to go wild.
+
+See https://github.com/quarkusio/quarkus/discussions/36691
 
 ## Build
 
