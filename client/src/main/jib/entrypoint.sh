@@ -5,12 +5,12 @@
 # It is executed in /work directory, which is the result of Maven compilation (target/quarkus-app).
 ########
 
-# Quarkus default opts (use jboss LogManager)
+NAME=client
+JMX_PORT=1329
+
 QUARKUS_DEFAULT_OPTS="-Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+JMX_OPTS="-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=$JMX_PORT -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+JFR_OPTS="-XX:StartFlightRecording=filename=/tmp/$NAME.jfr"
+JAVA_OPTS="$JMX_OPTS $JFR_OPTS $QUARKUS_DEFAULT_OPTS $JAVA_OPTS"
 
-# Java options, concat options defined in JAVA_OPTS env var and Quarkus default opts
-JAVA_OPTS="$JAVA_OPTS $QUARKUS_DEFAULT_OPTS"
-
-# Disable shellcheck, we don't want to use $JAVA_OPTS in quotes
-# shellcheck disable=SC2086
 java $JAVA_OPTS -jar quarkus-run.jar "$@"
