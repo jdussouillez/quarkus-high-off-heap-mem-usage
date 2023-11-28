@@ -49,7 +49,7 @@ public class Main implements QuarkusApplication {
                 return Uni.createFrom().voidItem()
                     .onItem()
                     .delayIt()
-                    .by(Duration.ofMillis(1 + random.nextInt(200)));
+                    .by(Duration.ofMillis(1 + random.nextInt(500)));
             })
             .invoke(products -> {
                 int nbProcessed = counter.addAndGet(products.size());

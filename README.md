@@ -45,7 +45,7 @@ docker run -d \
     -e JAVA_OPTS="-Xms64m -Xmx64m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT \
-    50000 \
+    100000 \
     && docker logs client -f
 ```
 
