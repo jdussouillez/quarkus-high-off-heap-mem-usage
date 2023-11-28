@@ -35,7 +35,6 @@ public class Main implements QuarkusApplication {
         }
         var counter = new AtomicInteger();
         return getProducts(itemNumber)
-            //.emitOn(Infrastructure.getDefaultWorkerPool())
             .onSubscription()
             .invoke(() -> Loggers.MAIN.info("Fetching products..."))
             .onCompletion()
