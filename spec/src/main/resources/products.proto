@@ -1,16 +1,13 @@
 syntax = "proto3";
 package com.github.jdussouillez.api.grpc;
 
+import "google/protobuf/empty.proto";
+
 option java_multiple_files = true;
 
 service ProductGrpcApiService {
 
-    rpc Get(ProductGetRequest) returns (stream Product) {}
-}
-
-message ProductGetRequest {
-
-    uint32 itemNumber = 1;
+    rpc GetAll(google.protobuf.Empty) returns (stream Product) {}
 }
 
 message Product {
@@ -20,4 +17,14 @@ message Product {
     string designation = 2;
 
     uint32 stock = 3;
+
+    string picture_url = 4;
+
+    optional string blueprint_url = 5;
+
+    double weight = 6;
+
+    double volume = 7;
+
+    bool obsolete = 8;
 }

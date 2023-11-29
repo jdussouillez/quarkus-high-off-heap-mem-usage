@@ -1,0 +1,2 @@
+CREATE DATABASE server;
+CREATE DATABASE client;

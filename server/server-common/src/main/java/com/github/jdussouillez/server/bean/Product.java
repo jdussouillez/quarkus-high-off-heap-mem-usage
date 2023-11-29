@@ -1,21 +1,45 @@
 package com.github.jdussouillez.server.bean;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Accessors(fluent = true, chain = true)
-@RequiredArgsConstructor
+@NoArgsConstructor
 @ToString
 public class Product {
 
     @Getter
-    protected final String id;
+    @Setter
+    protected String id;
 
     @Getter
-    protected final String designation;
+    @Setter
+    protected String designation;
 
     @Getter
-    protected final int stock;
+    @Setter
+    protected int stock;
+
+    @Getter
+    @Setter
+    protected String pictureUrl;
+
+    @Getter
+    @Setter
+    protected String blueprintUrl;
+
+    @Getter
+    @Setter
+    protected double weight;
+
+    @Getter
+    @Setter
+    protected double volume;
+
+    @Getter
+    @Setter
+    protected boolean obsolete;
 }

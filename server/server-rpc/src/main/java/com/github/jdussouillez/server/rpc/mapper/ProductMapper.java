@@ -8,10 +8,17 @@ public class ProductMapper implements GrpcMapper<Product, com.github.jdussouille
 
     @Override
     public com.github.jdussouillez.api.grpc.Product toGrpc(final Product product) {
-        return com.github.jdussouillez.api.grpc.Product.newBuilder()
+        var builder = com.github.jdussouillez.api.grpc.Product.newBuilder()
             .setId(product.id())
             .setDesignation(product.designation())
             .setStock(product.stock())
-            .build();
+            .setPictureUrl(product.pictureUrl())
+            .setWeight(product.weight())
+            .setVolume(product.volume())
+            .setObsolete(product.obsolete());
+        if (product.blueprintUrl() != null) {
+            builder.setBlueprintUrl(product.blueprintUrl());
+        }
+        return builder.build();
     }
 }

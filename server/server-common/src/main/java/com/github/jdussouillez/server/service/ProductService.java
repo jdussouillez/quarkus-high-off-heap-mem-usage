@@ -1,28 +1,50 @@
 package com.github.jdussouillez.server.service;
 
-import com.github.jdussouillez.server.Loggers;
 import com.github.jdussouillez.server.bean.Product;
+import static com.github.jdussouillez.server.jooq.Product.PRODUCT;
 import io.smallrye.mutiny.Multi;
+import io.vertx.mutiny.sqlclient.Row;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.util.Random;
+import jakarta.inject.Inject;
+import org.jooq.DSLContext;
+import org.jooq.TableField;
 
 @ApplicationScoped
 public class ProductService {
 
-    private final Random random = new Random(42L);
+    @Inject
+    protected DSLContext dslContext;
 
-    public Multi<Product> get(final int itemNumber) {
-        return Multi.createFrom()
-            .range(0, itemNumber)
-            .map(this::generate)
-            .onSubscription()
-            .invoke(() -> Loggers.MAIN.info("Sending products to the client..."))
-            .onCompletion()
-            .invoke(() -> Loggers.MAIN.info("All products sent!"));
+    @Inject
+    protected SqlService sqlService;
+
+    public Multi<Product> getAll() {
+        return sqlService.select(
+            dslContext
+                .select(
+                    PRODUCT.PRODUCTS.ID,
+                    PRODUCT.PRODUCTS.DESIGNATION,
+                    PRODUCT.PRODUCTS.STOCK,
+                    PRODUCT.PRODUCTS.PICTURE_URL,
+                    PRODUCT.PRODUCTS.BLUEPRINT_URL,
+                    PRODUCT.PRODUCTS.WEIGHT,
+                    PRODUCT.PRODUCTS.VOLUME,
+                    PRODUCT.PRODUCTS.OBSOLETE
+                )
+                .from(PRODUCT.PRODUCTS),
+            row -> new Product()
+                .id(get(row, PRODUCT.PRODUCTS.ID))
+                .designation(get(row, PRODUCT.PRODUCTS.DESIGNATION))
+                .stock(get(row, PRODUCT.PRODUCTS.STOCK))
+                .pictureUrl(get(row, PRODUCT.PRODUCTS.PICTURE_URL))
+                .blueprintUrl(get(row, PRODUCT.PRODUCTS.BLUEPRINT_URL))
+                .weight(get(row, PRODUCT.PRODUCTS.WEIGHT))
+                .volume(get(row, PRODUCT.PRODUCTS.VOLUME))
+                .obsolete(get(row, PRODUCT.PRODUCTS.OBSOLETE))
+        );
     }
 
-    private Product generate(final int num) {
-        var id = String.format("%08d", num);
-        return new Product(id, "Product #" + id, random.nextInt(10_000));
+    private static <T> T get(final Row row, final TableField<?, T> field) {
+        return row.get(field.getType(), field.getName());
     }
 }
