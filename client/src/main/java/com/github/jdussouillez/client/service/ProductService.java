@@ -1,12 +1,12 @@
 package com.github.jdussouillez.client.service;
 
+import com.github.jdussouillez.api.grpc.ProductGetRequest;
 import com.github.jdussouillez.api.grpc.ProductGrpcApiService;
 import com.github.jdussouillez.client.Loggers;
 import com.github.jdussouillez.client.bean.Product;
 import static com.github.jdussouillez.client.jooq.Product.PRODUCT;
 import com.github.jdussouillez.client.jooq.tables.records.ProductsRecord;
 import com.github.jdussouillez.client.mapper.ProductMapper;
-import com.google.protobuf.Empty;
 import io.quarkus.grpc.GrpcClient;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -30,9 +30,13 @@ public class ProductService {
     @Inject
     protected DSLContext dslContext;
 
-    public Multi<Product> fetch() {
+    public Multi<Product> fetch(final Integer limit) {
+        var reqBuilder = ProductGetRequest.newBuilder();
+        if (limit != null) {
+            reqBuilder.setLimit(limit);
+        }
         return productGrpcApiService
-            .getAll(Empty.getDefaultInstance())
+            .getAll(reqBuilder.build())
             .map(mapper::fromGrpc);
     }
 

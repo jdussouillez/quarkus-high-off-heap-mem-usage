@@ -18,20 +18,24 @@ public class ProductService {
     @Inject
     protected SqlService sqlService;
 
-    public Multi<Product> getAll() {
+    public Multi<Product> getAll(final Integer limit) {
+        var query = dslContext
+            .select(
+                PRODUCT.PRODUCTS.ID,
+                PRODUCT.PRODUCTS.DESIGNATION,
+                PRODUCT.PRODUCTS.STOCK,
+                PRODUCT.PRODUCTS.PICTURE_URL,
+                PRODUCT.PRODUCTS.BLUEPRINT_URL,
+                PRODUCT.PRODUCTS.WEIGHT,
+                PRODUCT.PRODUCTS.VOLUME,
+                PRODUCT.PRODUCTS.OBSOLETE
+            )
+            .from(PRODUCT.PRODUCTS);
+        if (limit != null) {
+            query.limit(limit);
+        }
         return sqlService.select(
-            dslContext
-                .select(
-                    PRODUCT.PRODUCTS.ID,
-                    PRODUCT.PRODUCTS.DESIGNATION,
-                    PRODUCT.PRODUCTS.STOCK,
-                    PRODUCT.PRODUCTS.PICTURE_URL,
-                    PRODUCT.PRODUCTS.BLUEPRINT_URL,
-                    PRODUCT.PRODUCTS.WEIGHT,
-                    PRODUCT.PRODUCTS.VOLUME,
-                    PRODUCT.PRODUCTS.OBSOLETE
-                )
-                .from(PRODUCT.PRODUCTS),
+            query,
             row -> new Product()
                 .id(get(row, PRODUCT.PRODUCTS.ID))
                 .designation(get(row, PRODUCT.PRODUCTS.DESIGNATION))

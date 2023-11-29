@@ -1,13 +1,16 @@
 syntax = "proto3";
 package com.github.jdussouillez.api.grpc;
 
-import "google/protobuf/empty.proto";
-
 option java_multiple_files = true;
 
 service ProductGrpcApiService {
 
-    rpc GetAll(google.protobuf.Empty) returns (stream Product) {}
+    rpc GetAll(ProductGetRequest) returns (stream Product) {}
+}
+
+message ProductGetRequest {
+
+    optional uint32 limit = 1;
 }
 
 message Product {

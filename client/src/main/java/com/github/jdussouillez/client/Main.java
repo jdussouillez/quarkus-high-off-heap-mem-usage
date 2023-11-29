@@ -14,12 +14,13 @@ public class Main implements QuarkusApplication {
 
     @Override
     public int run(final String... args) throws InterruptedException {
+        var limit = args.length == 1 ? Integer.parseInt(args[0]) : null;
         var counter = new AtomicInteger();
-        return productService.fetch()
+        return productService.fetch(limit)
             .onSubscription()
-            .invoke(() -> Loggers.MAIN.info("Fetching products..."))
+            .invoke(() -> Loggers.MAIN.info("Fetching {} products...", () -> limit != null ? limit : "all"))
             .onCompletion()
-            .invoke(() -> Loggers.MAIN.info("All products fetched!"))
+            .invoke(() -> Loggers.MAIN.info("Products fetched!"))
             .onFailure()
             .invoke(ex -> Loggers.MAIN.error("Error when fetching products", ex))
             .group()

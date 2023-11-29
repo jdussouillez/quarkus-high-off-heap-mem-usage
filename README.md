@@ -105,6 +105,18 @@ docker run \
     -e JAVA_OPTS="-Xms512m -Xmx512m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT
+
+# Client, but fetch only 100k products
+docker run \
+    --rm \
+    --network host \
+    --name client \
+    -m 1024m \
+    --cpus=2 \
+    -e JAVA_OPTS="-Xms512m -Xmx512m" \
+    -v /tmp:/tmp \
+    quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT \
+    100000
 ```
 
 ## Cleanup
