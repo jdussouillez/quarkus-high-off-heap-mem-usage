@@ -83,7 +83,7 @@ The OCI images are only built locally with name `quarkus-high-off-heap-mem-usage
 
 ```sh
 # Server
-docker run -d \
+docker run \
     --rm \
     --network host \
     --name server \
@@ -91,13 +91,12 @@ docker run -d \
     --cpus=2 \
     -e JAVA_OPTS="-Xms512m -Xmx512m" \
     -v /tmp:/tmp \
-    quarkus-high-off-heap-mem-usage/server:1.0.0-SNAPSHOT \
-    && docker logs server -f
+    quarkus-high-off-heap-mem-usage/server:1.0.0-SNAPSHOT
 ```
 
 ```sh
 # Client
-docker run -d \
+docker run \
     --rm \
     --network host \
     --name client \
@@ -105,8 +104,7 @@ docker run -d \
     --cpus=2 \
     -e JAVA_OPTS="-Xms512m -Xmx512m" \
     -v /tmp:/tmp \
-    quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT \
-    && docker logs client -f
+    quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT
 ```
 
 ## Cleanup
