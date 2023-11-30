@@ -47,13 +47,13 @@ docker run -d \
 Create the databases and insert data (in the server db only):
 
 ```sh
-PGPASSWORD=bar && \
-    psql -h localhost -p 5432 -U foo -f db/init.sql && \
-    psql -h localhost -p 5432 -U foo -d client -f db/client-init.sql && \
-    psql -h localhost -p 5432 -U foo -d server -f db/server-init.sql && \
-    unzip db/server-data.sql.zip -d db/ && \
-    psql -h localhost -p 5432 -U foo -d server -f db/server-data.sql -q -1 \
-    rm db/server-data.sql
+PGPASSWORD=bar \
+    && psql -h localhost -p 5432 -U foo -f db/init.sql \
+    && psql -h localhost -p 5432 -U foo -d client -f db/client-init.sql \
+    && psql -h localhost -p 5432 -U foo -d server -f db/server-init.sql \
+    && unzip db/server-data.sql.zip -d db/ \
+    && psql -h localhost -p 5432 -U foo -d server -f db/server-data.sql -q -1 \
+    && rm -v db/server-data.sql
 ```
 
 **Optional**: To generate another set of data, use:
