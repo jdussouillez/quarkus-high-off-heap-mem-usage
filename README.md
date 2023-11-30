@@ -72,9 +72,11 @@ cd spec && ./mvnw clean install && cd ..
 3. Build the server and client OCI images
 
 ```sh
-cd server && ./mvnw clean package -Dquarkus.container-image.build=true && \
-    cd ../client && ./mvnw clean package -Dquarkus.container-image.build=true && \
-    cd ..
+cd server \
+    && ./mvnw clean package -Dquarkus.container-image.build=true \
+    && cd ../client \
+    && ./mvnw clean package -Dquarkus.container-image.build=true \
+    && cd ..
 ```
 
 The OCI images are only built locally with name `quarkus-high-off-heap-mem-usage/(server or client)`.
@@ -106,7 +108,7 @@ docker run \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT
 
-# Client, but fetch only 100k products
+# Client, but fetch only 50k products
 docker run \
     --rm \
     --network host \
@@ -116,7 +118,7 @@ docker run \
     -e JAVA_OPTS="-Xms512m -Xmx512m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT \
-    100000
+    50000
 ```
 
 ## Cleanup
