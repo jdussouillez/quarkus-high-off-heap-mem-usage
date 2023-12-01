@@ -13,6 +13,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jooq.DSLContext;
 
 @ApplicationScoped
@@ -30,14 +31,30 @@ public class ProductService {
     @Inject
     protected DSLContext dslContext;
 
-    public Multi<Product> fetch(final Integer limit) {
+    public Multi<Product> fetch(final Integer limit, final String overflowMode) {
         var reqBuilder = ProductGetRequest.newBuilder();
         if (limit != null) {
             reqBuilder.setLimit(limit);
         }
-        return productGrpcApiService
+        var fetch = productGrpcApiService
             .getAll(reqBuilder.build())
             .map(mapper::fromGrpc);
+        if ("drop".equals(overflowMode)) {
+            var dropCounter = new AtomicInteger();
+            fetch = fetch.onOverflow()
+                .invoke(() -> dropCounter.incrementAndGet())
+                .drop()
+                .onCompletion()
+                .invoke(() -> Loggers.MAIN.info("Number of products dropped: {}", dropCounter::get));
+        } else if ("buffer".equals(overflowMode)) {
+            var bufferCounter = new AtomicInteger();
+            fetch = fetch.onOverflow()
+                .invoke(() -> bufferCounter.incrementAndGet())
+                .bufferUnconditionally()
+                .onCompletion()
+                .invoke(() -> Loggers.MAIN.info("Number of products buffered: {}", bufferCounter::get));
+        }
+        return fetch;
     }
 
     public Uni<Integer> persist(final Collection<Product> products) {

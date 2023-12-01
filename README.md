@@ -107,6 +107,10 @@ docker run \
     -e JAVA_OPTS="-Xms256m -Xmx256m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT
+
+# Usage: client [limit] [overflowMode]
+- limit: Optional, max number of products to fetch from server. -1 for no limit
+- overflowMode: Optional, "drop" or "buffer"
 ```
 
 ## Cleanup

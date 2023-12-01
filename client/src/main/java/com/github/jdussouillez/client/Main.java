@@ -14,11 +14,11 @@ public class Main implements QuarkusApplication {
 
     @Override
     public int run(final String... args) throws InterruptedException {
-        var limit = args.length == 1 ? Integer.parseInt(args[0]) : null;
+        var options = parseOptions(args);
         var counter = new AtomicInteger();
-        return productService.fetch(limit)
+        return productService.fetch(options.limit(), options.overflowMode())
             .onSubscription()
-            .invoke(() -> Loggers.MAIN.info("Fetching {} products...", () -> limit != null ? limit : "all"))
+            .invoke(() -> Loggers.MAIN.info("Fetching {} products...", () -> options.limit() != null ? options.limit() : "all"))
             .onCompletion()
             .invoke(() -> Loggers.MAIN.info("Products fetched!"))
             .onFailure()
@@ -40,5 +40,19 @@ public class Main implements QuarkusApplication {
             .recoverWithItem(1)
             .await()
             .indefinitely();
+    }
+
+    private static Options parseOptions(final String[] args) {
+        var limit = args.length >= 1 ? Integer.parseInt(args[0]) : null;
+        if (limit != null && limit == -1) {
+            limit = null;
+        }
+        return new Options(
+            limit,
+            args.length >= 2 ? args[1] : null
+        );
+    }
+
+    private static record Options(Integer limit, String overflowMode) {
     }
 }
