@@ -127,7 +127,7 @@ docker rm --force server \
 
 ## Analysis
 
-Go in the [charts](./charts) folder to get some charts about memory usage on the client side and number of products "received" (sent by the server) and "processed" (grouped in chunks and insert into target database).
+Go in the [graphs](./graphs) folder to get some graphs about memory usage on the client side and number of products "received" (sent by the server) and "processed" (grouped in chunks and insert into target database).
 
 The problem is related to back-pressure: the producer (server) is faster than the consumer (client) and the messages not processed by the client yet are stored in the off-heap memory (I guess? because the heap memory usage doesn't change that much).
 
@@ -140,18 +140,18 @@ What bothers me is that "bump": if the client cannot handle all messages, it sho
 
 When using `onOverflow().drop()`, ~80% of messages are dropped but we can still see a "bump" in the client container used memory. Why?
 
-### Memory charts
+### Memory graphs
 
 - Using a 1GB memory heap, in a 4GB client container
 
-![1GB heap - 4GB container](./charts/1gb-4gb.png)
+![1GB heap - 4GB container](./graphs/1gb-4gb.png)
 
 - Using a 1GB memory heap, in a 4GB client container, explicitly using `onOverflow().bufferUnconditionally()` (very similar to the first one. Is it the default strategy? I can't find it written in the docs)
 
-![1GB heap - 4GB container (buffer)](./charts/1gb-4gb-overflow-buffer.png)
+![1GB heap - 4GB container (buffer)](./graphs/1gb-4gb-overflow-buffer.png)
 
 - Using a 1GB memory heap, in a 4GB client container, drop messages on overflow
 
-![1GB heap - 4GB container (drop)](./charts/1gb-4gb-overflow-drop.png)
+![1GB heap - 4GB container (drop)](./graphs/1gb-4gb-overflow-drop.png)
 
-*See more in the [charts](./charts) folder.*
+*See more in the [graphs](./graphs) folder.*
