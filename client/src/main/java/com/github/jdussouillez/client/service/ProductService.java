@@ -38,6 +38,8 @@ public class ProductService {
         }
         var fetch = productGrpcApiService
             .getAll(reqBuilder.build())
+            // .paceDemand()
+            // .using(new FixedDemandPacer(10_000L, Duration.ofSeconds(2L)))
             .map(mapper::fromGrpc);
         if ("drop".equals(overflowMode)) {
             var dropCounter = new AtomicInteger();
