@@ -89,9 +89,9 @@ docker run \
     --rm \
     --network host \
     --name server \
-    -m 1024m \
+    -m 2048m \
     --cpus=2 \
-    -e JAVA_OPTS="-Xms512m -Xmx512m" \
+    -e JAVA_OPTS="-Xms1024m -Xmx1024m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/server:1.0.0-SNAPSHOT
 ```
@@ -104,21 +104,9 @@ docker run \
     --name client \
     -m 1024m \
     --cpus=2 \
-    -e JAVA_OPTS="-Xms512m -Xmx512m" \
+    -e JAVA_OPTS="-Xms256m -Xmx256m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT
-
-# Client, but fetch only 50k products
-docker run \
-    --rm \
-    --network host \
-    --name client \
-    -m 1024m \
-    --cpus=2 \
-    -e JAVA_OPTS="-Xms512m -Xmx512m" \
-    -v /tmp:/tmp \
-    quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT \
-    50000
 ```
 
 ## Cleanup
