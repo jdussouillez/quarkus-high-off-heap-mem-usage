@@ -124,7 +124,6 @@ docker rm --force server \
     && docker rmi postgres:15-bullseye
 ```
 
-
 ## Analysis
 
 Go in the [graphs](./graphs) folder to get some graphs about memory usage on the client side and number of products "received" (sent by the server) and "processed" (grouped in chunks and insert into target database).
@@ -138,7 +137,18 @@ What is weird is:
 
 What bothers me is that "bump": if the client cannot handle all messages, it should be buffering them continuously so it should look like a straight line since the client started, right? Not a bump just when the server is done!
 
-When using `onOverflow().drop()`, ~80% of messages are dropped but we can still see a "bump" in the client container used memory. Why?
+When using `onOverflow().drop()`, ~80% of messages are dropped but we can still see a "bump" in the client container used memory. Why?! What is stored in that off-heap memory?
+
+### Consequences
+
+- The container used memory can go up to 100% really quick after the server sent everthing to the client. So I guess the kernel just kill it when running on my K8s cluster with ArgoWorkflow.
+
+### How to fix this?
+
+- Make the consumer faster
+- ~~Make the producer go slower?~~ *Yeah sure but do we really want that?*
+- Implementing a custom back-pressure strategy like mentionned [here](https://quarkus.io/blog/mutiny-back-pressure/): `upstream.get().request(1);`
+  - The problem is that I whould need to try this and still get a multi at the end to chain this with other operations. The example in the article works because it uses `subscribe()`
 
 ### Memory graphs
 
