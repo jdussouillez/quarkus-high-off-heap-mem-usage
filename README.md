@@ -153,7 +153,7 @@ Note:
 - Make the consumer faster
 - ~~Make the producer go slower?~~ *Yeah sure but do we really want that?*
 - Implementing a custom back-pressure strategy like mentionned [here](https://quarkus.io/blog/mutiny-back-pressure/): `upstream.get().request(1);`
-  - The problem is that I whould need to try this and still get a multi at the end to chain this with other operations. The example in the article works because it uses `subscribe()`
+  - The problem is that I would need to try this and still get a multi at the end to chain this with other operations. The example in the article works because it uses `subscribe()`
 
 ### Memory graphs
 
