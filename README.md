@@ -139,6 +139,11 @@ What bothers me is that "bump": if the client cannot handle all messages, it sho
 
 When using `onOverflow().drop()`, ~80% of messages are dropped but we can still see a "bump" in the client container used memory. Why?! What is stored in that off-heap memory?
 
+Note:
+- VisualVM was used to monitor used heap memory
+- `docker stats` was used to monitor used container memory
+- These values are not high precision results as I recorded my terminal and VisualVM windows and then played/paused the video to write down the numbers every X seconds 😐
+
 ### Consequences
 
 - The container used memory can go up to 100% really quick after the server sent everthing to the client. So I guess the kernel just kill it when running on my K8s cluster with ArgoWorkflow.
