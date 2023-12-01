@@ -123,3 +123,35 @@ docker rm --force server \
     && docker rmi quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT -f \
     && docker rmi postgres:15-bullseye
 ```
+
+
+## Analysis
+
+Go in the [charts](./charts) folder to get some charts about memory usage on the client side and number of products "received" (sent by the server) and "processed" (grouped in chunks and insert into target database).
+
+The problem is related to back-pressure: the producer (server) is faster than the consumer (client) and the messages not processed by the client yet are stored in the off-heap memory (I guess? because the heap memory usage doesn't change that much).
+
+The server sends all the products to the client and the client process them while receiving more products. But once the server is done sending products, the client still process products for a few seconds/minutes.
+What is weird is:
+- The client container memory (heap+off-heap) is slowly growing up continuously when the server is sending data, even if the heap memory is not changed (the heap does not grow up, thanks to both `Xms` and `Xmx` JVM options set to the same value)
+- Once the server is done sending data, there is a little "bump" in the client off-heap memory that increases just when the server send the last data.
+
+What bothers me is that "bump": if the client cannot handle all messages, it should be buffering them continuously so it should look like a straight line since the client started, right? Not a bump just when the server is done!
+
+When using `onOverflow().drop()`, ~80% of messages are dropped but we can still see a "bump" in the client container used memory. Why?
+
+### Memory charts
+
+- Using a 1GB memory heap, in a 4GB client container
+
+![1GB heap - 4GB container](./charts/1gb-4gb.png)
+
+- Using a 1GB memory heap, in a 4GB client container, explicitly using `onOverflow().bufferUnconditionally()` (very similar to the first one. Is it the default strategy? I can't find it written in the docs)
+
+![1GB heap - 4GB container (buffer)](./charts/1gb-4gb-overflow-buffer.png)
+
+- Using a 1GB memory heap, in a 4GB client container, drop messages on overflow
+
+![1GB heap - 4GB container (drop)](./charts/1gb-4gb-overflow-drop.png)
+
+*See more in the [charts](./charts) folder.*
