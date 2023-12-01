@@ -157,6 +157,10 @@ Note:
 
 ### Memory graphs
 
+- Using a 512GB memory heap, in a 1GB client container
+
+![512MB heap - 1GB container](./graphs/512mb-1gb.png)
+
 - Using a 1GB memory heap, in a 4GB client container
 
 ![1GB heap - 4GB container](./graphs/1gb-4gb.png)
