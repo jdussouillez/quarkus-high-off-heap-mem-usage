@@ -102,9 +102,9 @@ docker run \
     --rm \
     --network host \
     --name client \
-    -m 1024m \
+    -m 4096m \
     --cpus=2 \
-    -e JAVA_OPTS="-Xms256m -Xmx256m" \
+    -e JAVA_OPTS="-Xms1024m -Xmx1024m" \
     -v /tmp:/tmp \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT
 
