@@ -179,4 +179,8 @@ Note:
 
 ![1GB heap - 4GB container (old client)](<./graphs/1gb-4gb-old-client.png>)
 
+- Using a 1GB memory heap, in a 4GB client container and using `-XX:+UnlockExperimentalVMOptions -XX:TrimNativeHeapInterval=5000`
+
+![1GB heap - 4GB container (trim native heap memory)](./graphs/1gb-4gb-trim-native-heap-interval.png)
+
 *See more in the [graphs](./graphs) folder.*

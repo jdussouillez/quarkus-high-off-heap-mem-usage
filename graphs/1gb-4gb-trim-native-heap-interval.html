@@ -1,0 +1,204 @@
+<html>
+    <head>
+        <title>1GB heap - 4GB container</title>
+    </head>
+    <body>
+        <div style="width: 80%">
+            <p>1GB heap - 4GB container (using docker top and some JVM tuning: "-XX:+UnlockExperimentalVMOptions -XX:TrimNativeHeapInterval=5000")</p>
+            <canvas id="chart"></canvas>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.7/d3.min.js"></script>
+        <script>
+            // --------------------------
+            // Raw data
+            // --------------------------
+            const NB_PRODUCTS = 1000000;
+            const CLIENT_HEAP_MEMORY = 1024;
+            const CLIENT_CONTAINER_MEMORY = 4096;
+            const data = [
+                {time: 0, productsReceived: 0, productsProcessed: 0, usedHeapMem: 43, rss: 247508},
+                {time: 10, productsReceived: 110000, productsProcessed: 30000, usedHeapMem: 191, rss: 1044888},
+                {time: 20, productsReceived: 380000, productsProcessed: 100000, usedHeapMem: 46, rss: 1327892},
+                {time: 30, productsReceived: 600000, productsProcessed: 170000, usedHeapMem: 165, rss: 1332496},
+                {time: 40, productsReceived: 820000, productsProcessed: 230000, usedHeapMem: 263, rss: 1437616},
+                {time: 47, productsReceived: 990000, productsProcessed: 280000, usedHeapMem: 588, rss: 1503632},
+                {time: 50, productsReceived: 1000000, productsProcessed: 300000, usedHeapMem: 555, rss: 2221444},
+                {time: 55, productsReceived: 1000000, productsProcessed: 340000, usedHeapMem: 731, rss: 3089604},
+                {time: 60, productsReceived: 1000000, productsProcessed: 380000, usedHeapMem: 852, rss: 2986964},
+                {time: 65, productsReceived: 1000000, productsProcessed: 430000, usedHeapMem: 438, rss: 1177604},
+                {time: 70, productsReceived: 1000000, productsProcessed: 470000, usedHeapMem: 595, rss: 1176408},
+                {time: 80, productsReceived: 1000000, productsProcessed: 570000, usedHeapMem: 841, rss: 1176936},
+                {time: 90, productsReceived: 1000000, productsProcessed: 660000, usedHeapMem: 720, rss: 1196584},
+                {time: 100, productsReceived: 1000000, productsProcessed: 750000, usedHeapMem: 774, rss: 1198720},
+                {time: 110, productsReceived: 1000000, productsProcessed: 850000, usedHeapMem: 379, rss: 1198100},
+                {time: 120, productsReceived: 1000000, productsProcessed: 940000, usedHeapMem: 554, rss: 1202340},
+                {time: 126, productsReceived: 1000000, productsProcessed: 1000000, usedHeapMem: 581, rss: 1199412},
+            ];
+            data.forEach(d => {
+                d.productsRemaining = NB_PRODUCTS - d.productsReceived;
+                d.maxHeapMem = CLIENT_HEAP_MEMORY;
+                d.maxContainerMem = CLIENT_CONTAINER_MEMORY;
+                d.rss = d.rss / 1024;
+            });
+
+
+            // --------------------------
+            // Create chart data
+            // --------------------------
+            const productsReceivedDataset = {
+                label: "Products received",
+                data: data.map(d => ({x: d.time, y: d.productsReceived, _data: d})),
+                pointBackgroundColor: "blue",
+                borderColor: "rgba(0,0,128,0.5)",
+                pointRadius: 4,
+                pointStyle: "triangle",
+                showLine: true,
+                fill: false,
+                yAxisID: "y-axis-product"
+            };
+            const productsRemainingDataset = {
+                label: "Products remaining",
+                data: data.map(d => ({x: d.time, y: d.productsRemaining, _data: d})),
+                pointBackgroundColor: "rgb(128,0,128)",
+                borderColor: "rgba(128,0,128,0.5)",
+                pointRadius: 4,
+                pointStyle: "triangle",
+                showLine: true,
+                fill: false,
+                yAxisID: "y-axis-product"
+            };
+            const productsProcessedDataset = {
+                label: "Products processed",
+                data: data.map(d => ({x: d.time, y: d.productsProcessed, _data: d})),
+                pointBackgroundColor: "green",
+                borderColor: "rgba(0,128,0,0.5)",
+                pointRadius: 4,
+                pointStyle: "triangle",
+                showLine: true,
+                fill: false,
+                yAxisID: "y-axis-product"
+            };
+            const usedHeapMemoryDataset = {
+                label: "Used heap memory",
+                data: data.map(d => ({x: d.time, y: d.usedHeapMem, _data: d})),
+                backgroundColor: "darkorange",
+                borderColor: "rgb(255,140,0,0.8)",
+                borderWidth: 3,
+                pointRadius: 2,
+                showLine: true,
+                fill: false,
+                borderDash: [2, 2],
+                yAxisID: "y-axis-mem"
+            };
+            const rssMemoryDataset = {
+                label: "RSS memory",
+                data: data.map(d => ({x: d.time, y: d.rss, _data: d})),
+                backgroundColor: "rgb(160,82,45)",
+                borderColor: "rgba(160,82,45,0.8)",
+                borderWidth: 3,
+                pointRadius: 2,
+                showLine: true,
+                fill: false,
+                borderDash: [2, 2],
+                yAxisID: "y-axis-mem"
+            };
+            const maxHeapMemoryDataset = {
+                label: "Max heap memory",
+                data: data.map(d => ({x: d.time, y: d.maxHeapMem, _data: d})),
+                backgroundColor: "red",
+                borderColor: "red",
+                borderWidth: 2,
+                pointRadius: 1,
+                showLine: true,
+                fill: false,
+                borderDash: [10, 1],
+                yAxisID: "y-axis-mem"
+            };
+            const maxContainerMemoryDataset = {
+                label: "Max container memory",
+                data: data.map(d => ({x: d.time, y: d.maxContainerMem, _data: d})),
+                backgroundColor: "darkred",
+                borderColor: "darkred",
+                borderWidth: 2,
+                pointRadius: 1,
+                showLine: true,
+                fill: false,
+                borderDash: [10, 1],
+                yAxisID: "y-axis-mem"
+            };
+            const chartData = {
+                datasets: [
+                    productsReceivedDataset,
+                    // productsRemainingDataset,
+                    productsProcessedDataset,
+                    usedHeapMemoryDataset,
+                    rssMemoryDataset,
+                    maxHeapMemoryDataset,
+                    maxContainerMemoryDataset
+                ]
+            };
+            window.onload = function () {
+                const ctx = document.getElementById("chart").getContext("2d");
+                window.chart = new Chart(ctx, {
+                    type: "scatter",
+                    data: chartData,
+                    options: {
+                        legend: {
+                            display: true,
+                            position: "right",
+                            labels: {
+                                usePointStyle: true
+                            }
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: (tooltip, data) => {
+                                    const dataset = data.datasets[tooltip.datasetIndex];
+                                    const node = dataset.data[tooltip.index];
+                                    const unit = dataset.yAxisID === "y-axis-mem" ? "MB" : "products";
+                                    return `Time ${node._data.time} - ${dataset.label}: ${node.y} ${unit}`;
+                                }
+                            }
+                        },
+                        scales: {
+                            xAxes: [
+                                {
+                                    id: "x-axis-time",
+                                    display: true,
+                                    position: "bottom",
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: "Time from start (s)"
+                                    }
+                                }
+                            ],
+                            yAxes: [
+                                {
+                                    id: "y-axis-product",
+                                    display: true,
+                                    position: "left",
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: "Number of products sent/processed"
+                                    }
+                                },
+                                {
+                                    id: "y-axis-mem",
+                                    display: true,
+                                    position: "right",
+                                    stacked: true,
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: "Memory (MB)"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                });
+            };
+        </script>
+    </body>
+</html>
