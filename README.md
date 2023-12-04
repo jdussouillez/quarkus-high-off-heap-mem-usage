@@ -184,4 +184,8 @@ Note:
 
 ![1GB heap - 4GB container (trim native heap memory)](./graphs/1gb-4gb-trim-native-heap-interval.png)
 
+- Using a 1GB memory heap, in a 4GB client container and no server gzip compression
+
+![1GB heap - 4GB container (no server compression)](./graphs/1gb-4gb-no-compression.png)
+
 *See more in the [graphs](./graphs) folder.*
