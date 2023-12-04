@@ -4,6 +4,8 @@ Simple project to reproduce a suspicious behavior where the off heap memory seem
 
 See https://github.com/quarkusio/quarkus/discussions/36691
 
+**Fixed in https://github.com/eclipse-vertx/vertx-grpc/pull/81**
+
 ## Architecture
 
 - `spec` - gRPC specifications (used by both the server and client)
