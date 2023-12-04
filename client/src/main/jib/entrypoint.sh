@@ -14,6 +14,7 @@ JMX_OPTS="-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.por
 JFR_OPTS="-XX:StartFlightRecording=filename=/tmp/$NAME.jfr"
 OTHER_OPTS=""
 #OTHER_OPTS="-XX:+UnlockExperimentalVMOptions -XX:TrimNativeHeapInterval=5000"
+#OTHER_OPTS="-Dio.netty.maxDirectMemory=0"
 JAVA_OPTS="$JMX_OPTS $JFR_OPTS $OTHER_OPTS $JOOQ_OPTS $QUARKUS_DEFAULT_OPTS $JAVA_OPTS"
 
 java $JAVA_OPTS -jar quarkus-run.jar "$@"
