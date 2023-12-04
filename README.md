@@ -167,10 +167,10 @@ Note:
 
 - Using a 1GB memory heap, in a 4GB client container, explicitly using `onOverflow().bufferUnconditionally()` (very similar to the first one. Is it the default strategy? I can't find it written in the docs)
 
-![1GB heap - 4GB container (buffer)](./graphs/1gb-4gb-overflow-buffer.png)
+![1GB heap - 4GB container (buffer)](./graphs/legacy (docker stats)/1gb-4gb-overflow-buffer.png)
 
 - Using a 1GB memory heap, in a 4GB client container, drop messages on overflow
 
-![1GB heap - 4GB container (drop)](./graphs/1gb-4gb-overflow-drop.png)
+![1GB heap - 4GB container (drop)](./graphs/legacy (docker stats)/1gb-4gb-overflow-drop.png)
 
 *See more in the [graphs](./graphs) folder.*
