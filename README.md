@@ -106,6 +106,7 @@ docker run \
     --cpus=2 \
     -e JAVA_OPTS="-Xms1024m -Xmx1024m" \
     -v /tmp:/tmp \
+    -v /opt/async-profiler:/opt/async-profiler \
     quarkus-high-off-heap-mem-usage/client:1.0.0-SNAPSHOT
 
 # Usage: client [limit] [overflowMode]
