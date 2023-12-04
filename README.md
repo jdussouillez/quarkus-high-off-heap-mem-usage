@@ -141,7 +141,7 @@ When using `onOverflow().drop()`, ~80% of messages are dropped but we can still 
 
 Note:
 - VisualVM was used to monitor used heap memory
-- `docker stats` was used to monitor used container memory
+- ~~`docker stats` was used to monitor used container memory~~. **Use `watch -n 1 docker top client -o pid,rss,args` instead**. See https://quarkus.io/guides/performance-measure#measuring-memory-correctly-on-docker
 - These values are not high precision results as I recorded my terminal and VisualVM windows and then played/paused the video to write down the numbers every X seconds 😐
 
 ### Consequences

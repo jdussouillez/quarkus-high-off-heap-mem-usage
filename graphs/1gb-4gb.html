@@ -4,7 +4,7 @@
     </head>
     <body>
         <div style="width: 80%">
-            <p>1GB heap - 4GB container</p>
+            <p>1GB heap - 4GB container (using docker top)</p>
             <canvas id="chart"></canvas>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
@@ -18,26 +18,29 @@
             const CLIENT_HEAP_MEMORY = 1024;
             const CLIENT_CONTAINER_MEMORY = 4096;
             const data = [
-                {time: 0, productsReceived: 0, productsProcessed: 0, usedHeapMem: 25, usedContainerMem: 219},
-                {time: 10, productsReceived: 110000, productsProcessed: 30000, usedHeapMem: 264, usedContainerMem: 1008},
-                {time: 20, productsReceived: 450000, productsProcessed: 130000, usedHeapMem: 288, usedContainerMem: 1530},
-                {time: 30, productsReceived: 670000, productsProcessed: 190000, usedHeapMem: 193, usedContainerMem: 1624},
-                {time: 40, productsReceived: 880000, productsProcessed: 260000, usedHeapMem: 543, usedContainerMem: 1677},
-                {time: 46, productsReceived: 1000000, productsProcessed: 310000, usedHeapMem: 471, usedContainerMem: 1715},
-                {time: 50, productsReceived: 1000000, productsProcessed: 330000, usedHeapMem: 297, usedContainerMem: 2735},
-                {time: 60, productsReceived: 1000000, productsProcessed: 420000, usedHeapMem: 607, usedContainerMem: 3209},
-                {time: 70, productsReceived: 1000000, productsProcessed: 510000, usedHeapMem: 872, usedContainerMem: 3209},
-                {time: 80, productsReceived: 1000000, productsProcessed: 610000, usedHeapMem: 558, usedContainerMem: 3209},
-                {time: 90, productsReceived: 1000000, productsProcessed: 700000, usedHeapMem: 726, usedContainerMem: 3210},
-                {time: 100, productsReceived: 1000000, productsProcessed: 800000, usedHeapMem: 882, usedContainerMem: 3221},
-                {time: 110, productsReceived: 1000000, productsProcessed: 890000, usedHeapMem: 832, usedContainerMem: 3221},
-                {time: 120, productsReceived: 1000000, productsProcessed: 990000, usedHeapMem: 929, usedContainerMem: 3221},
-                {time: 121, productsReceived: 1000000, productsProcessed: 1000000, usedHeapMem: 585, usedContainerMem: 3221},
+                {time: 0, productsReceived: 0, productsProcessed: 0, usedHeapMem: 20, rss: 258992},
+                {time: 10, productsReceived: 80000, productsProcessed: 20000, usedHeapMem: 622, rss: 718352},
+                {time: 20, productsReceived: 410000, productsProcessed: 120000, usedHeapMem: 613, rss: 1561576},
+                {time: 30, productsReceived: 620000, productsProcessed: 190000, usedHeapMem: 135, rss: 1680684},
+                {time: 40, productsReceived: 830000, productsProcessed: 260000, usedHeapMem: 130, rss: 1722084},
+                {time: 45, productsReceived: 950000, productsProcessed: 310000, usedHeapMem: 556, rss: 1743984},
+                {time: 47, productsReceived: 1000000, productsProcessed: 320000, usedHeapMem: 508, rss: 1748556},
+                {time: 50, productsReceived: 1000000, productsProcessed: 340000, usedHeapMem: 426, rss: 2287172},
+                {time: 55, productsReceived: 1000000, productsProcessed: 380000, usedHeapMem: 375, rss: 3213676},
+                {time: 60, productsReceived: 1000000, productsProcessed: 430000, usedHeapMem: 740, rss: 3277448},
+                {time: 65, productsReceived: 1000000, productsProcessed: 480000, usedHeapMem: 354, rss: 3277448},
+                {time: 70, productsReceived: 1000000, productsProcessed: 530000, usedHeapMem: 471, rss: 3277508},
+                {time: 80, productsReceived: 1000000, productsProcessed: 640000, usedHeapMem: 831, rss: 3277768},
+                {time: 90, productsReceived: 1000000, productsProcessed: 740000, usedHeapMem: 445, rss: 3292352},
+                {time: 100, productsReceived: 1000000, productsProcessed: 840000, usedHeapMem: 732, rss: 3292684},
+                {time: 110, productsReceived: 1000000, productsProcessed: 950000, usedHeapMem: 584, rss: 3292744},
+                {time: 115, productsReceived: 1000000, productsProcessed: 1000000, usedHeapMem: 451, rss: 3292744},
             ];
             data.forEach(d => {
                 d.productsRemaining = NB_PRODUCTS - d.productsReceived;
                 d.maxHeapMem = CLIENT_HEAP_MEMORY;
                 d.maxContainerMem = CLIENT_CONTAINER_MEMORY;
+                d.rss = d.rss / 1024;
             });
 
 
@@ -89,9 +92,9 @@
                 borderDash: [2, 2],
                 yAxisID: "y-axis-mem"
             };
-            const usedContainerMemoryDataset = {
-                label: "Used container memory",
-                data: data.map(d => ({x: d.time, y: d.usedContainerMem, _data: d})),
+            const rssMemoryDataset = {
+                label: "RSS memory",
+                data: data.map(d => ({x: d.time, y: d.rss, _data: d})),
                 backgroundColor: "rgb(160,82,45)",
                 borderColor: "rgba(160,82,45,0.8)",
                 borderWidth: 3,
@@ -131,7 +134,7 @@
                     // productsRemainingDataset,
                     productsProcessedDataset,
                     usedHeapMemoryDataset,
-                    usedContainerMemoryDataset,
+                    rssMemoryDataset,
                     maxHeapMemoryDataset,
                     maxContainerMemoryDataset
                 ]
