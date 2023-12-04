@@ -139,6 +139,8 @@ What bothers me is that "bump": if the client cannot handle all messages, it sho
 
 When using `onOverflow().drop()`, ~80% of messages are dropped but we can still see a "bump" in the client container used memory. Why?! What is stored in that off-heap memory?
 
+**Interesting fact: using the old gRPC client `quarkus.grpc.clients.serv.use-quarkus-grpc-client=false` then the memory "bump" almost disappear!**
+
 Note:
 - VisualVM was used to monitor used heap memory
 - ~~`docker stats` was used to monitor used container memory~~. **Use `watch -n 1 docker top client -o pid,rss,args` instead**. See https://quarkus.io/guides/performance-measure#measuring-memory-correctly-on-docker
@@ -172,5 +174,9 @@ Note:
 - Using a 1GB memory heap, in a 4GB client container, drop messages on overflow
 
 ![1GB heap - 4GB container (drop)](<./graphs/legacy (docker stats)/1gb-4gb-overflow-drop.png>)
+
+- Using a 1GB memory heap, in a 4GB client container, using the old gRPC client (not based on Vert.x)
+
+![1GB heap - 4GB container (old client)](<./graphs/1gb-4gb-old-client.png>)
 
 *See more in the [graphs](./graphs) folder.*
